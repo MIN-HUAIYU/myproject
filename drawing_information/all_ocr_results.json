@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-12-22T17:33:22.426643",
+  "total_files": 1,
+  "ocr_results": {
+    "施工图纸2.png": {
+      "ocr_result": "技术数据表\n项目 程 流程一 流程二 项目 程 流程一 流程二\n压力 设计 0.8/FV 1.0/FV 焊接接头系数 0.85 0.85\nMPa(G) 操作 0.5 0.02 无损检测方法 RT\n设计压差 MPa 无损检测比例 20% 20%\n温度 设计 220 220 耐压 1.40/- 液压\n℃ 操作(进口/出口) 158.9/158.9 103/105 试验 压力(卧/立)MPa 1.12/- 1.40/- 全真空校核 耐压试验压差 MPa\n介质 名称 低压蒸汽及凝液 碳酸钾溶液及蒸气(注6) 泄漏 种类\n毒性程度 中度危害 试验 压力 MPa\n爆炸危害 几何容积 m³ 0.97 2.94\n程数 mm 1 1\n腐蚀裕量 0/3(注1) 0/3(注1)\n地震烈度 8 保温 材料 玻璃棉 玻璃棉\n风压值 N/m² 700 厚度 mm 130 130\n风速 m/s 1.3 设备净重 kg 8102\n雪压值 N/m² 1400 设备充水后总重 kg 10587\n场地类别 II 类 设计使用年限 20年(板束除外)\n地面粗糙度 A 换热面积 m² 114\n管口表 NOZZLE SCHEDULE\n代号 用途 数量 公称尺寸 法兰类型及密封面型式 焊接 件数 备注\nMARK SERVICE QTY. NPS. (DN) FLANGE TYPE&CONNECTION 详图 外伸高度 MATCH FLANGE REMARK\nN1 低压蒸汽及凝液入口 1 450 Class 150 WN/RF 见图 见图 HG/T 20615-2009\nN2 低压蒸汽及凝液出口 1 80 Class 150 WN/RF 见图 见图 HG/T 20615-2009\nN3 碳酸钾溶液及蒸气入口 1 600 Class 150 WN/RF 见图 见图 HG/T 20615-2009\nN4 碳酸钾溶液及蒸气出口 1 1000 焊接 焊接 见图 见图 Q245R+S30403 1016X(10+3)\nV 排气口 1 25 Class 150 WN/RF 见图 见图 S31603 法兰盖 HG/T 20615-2009\nD 排液口 1 25 Class 150 WN/RF 见图 见图 S31603 法兰盖 HG/T 20615-2009\n主要受压元件材料表 MAIN PRESSURE COMPONENTS MATERIAL\n名称 材料 名称 材料\nPARTS.NAME MATERIAL PARTS.NAME MATERIAL\n板片 316L 侧板 S31603\n方法兰 Q345R+S31603 流程一管箱 S31603\n压板 Q345R+S31603 流程二管箱 S31603\n设备流程示意图及说明 说明\n流程示意图 流程二出口 1.换热器采用错流1-1流程结构。\n2.流程一：热侧介质低压蒸汽及凝液在流程一内流动；\n流程二：冷侧介质碳酸钾溶液及蒸汽在流程二内流动。\n3.低压蒸汽及凝液从换热器管口N1流入，\n从换热器管口N2流出；\n碳酸钾溶液及蒸汽从换热器管口N3流入，\n从换热器管口N4流出。\n流程一入口 N1 流程一出口 N2\n流程二入口 N3\n产品名称 LANPEC所有,未经LANPEC书面许可不准复制或转让第三方。\nThis document is the property of LANPEC. It shall not be reproduced or transferred\nto any other party without LANPEC's permission in written form.\n甘肃蓝科石化高新装备股份有限公司\nLanpec Technologies Limited\n设计证书号 CERTIF.NO.\n项目编号 PROJECT NO.\n产品编号 JOB NO.\n25BQ018\n施工设计\n图纸名称 DRAWING TITLE:\n蒸汽煮沸器Ⅱ\n26421-E002AB\nLTB2-500A-1-1.2-1.0\n批准 APPPROVED\n会签 CO-SIGN\n2025.5.30 图号 25BQ018-00 第1张 共1张 图幅 A1 比例\n2025.5.30 DRAWING NO. SHEET OF DRAWING SIZE\n2025.5.30 文件编号 DOCUMENT NO.\n版本号 REV.\nA1\n25BQ018\n2025.5.30\nDESIGNED\nDESIGNED\n校对 CHECKED\n审核 STANDARD\nREVIEWED\n工程总承包 EPCC CONTRACTOR\n项目名称 PROJECT 伊泰伊犁100万吨/年煤制油示范项目油品合成装置尾气脱碳单元\n业主 CLIENT 伊泰伊犁能源有限公司 业主项目号 CLIENT PROJECT NO.\n批准 APPROVED\n批准\n批准\nA1\n25BQ018\n2025.5.30\nDESIGNED\nDESIGNED\n校对 CHECKED\n审核 STANDARD\nREVIEWED\n",
+      "timestamp": "2025-12-22T17:33:22.425078"
+    }
+  },
+  "extracted_data": [
+    {
+      "图纸名称": "施工图纸2.png",
+      "产品编号": "",
+      "用户名称": "",
+      "设备名称": "",
+      "重量": "",
+      "热侧介质": "",
+      "冷侧介质": "",
+      "设计压力": "0.85 MPa",
+      "设计温度": "",
+      "设备型号": "",
+      "板片材质": "316L",
+      "设备位号": "",
+      "装置名称": ""
+    }
+  ]
+}
