@@ -37,9 +37,14 @@ jobs:
       # 4. 并行部署前端和后端
       - name: Deploy Frontend
         run: |
-          # 删除整个目录并重新创建（避免权限冲突）
-          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 \
-            "rm -rf /www/wwwroot/aiaiai && mkdir -p /www/wwwroot/aiaiai"
+          # 移除文件不可变属性，然后删除整个目录
+          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 << 'ENDSSH'
+            if [ -d /www/wwwroot/aiaiai ]; then
+              chattr -R -i /www/wwwroot/aiaiai 2>/dev/null || true
+              rm -rf /www/wwwroot/aiaiai
+            fi
+            mkdir -p /www/wwwroot/aiaiai
+          ENDSSH
 
           # 上传前端文件
           scp -i ~/.ssh/id_ed25519 -r drawing_information/frontend/dist/* \
