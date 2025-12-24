@@ -1,14 +1,13 @@
 import base64
-from openai import OpenAI
+import os
+import requests
 from config.settings import DASHSCOPE_API_KEY, DASHSCOPE_BASE_URL, OCR_MODEL
 
 
 class AliyunOCRClient:
     def __init__(self):
-        self.client = OpenAI(
-            api_key=DASHSCOPE_API_KEY,
-            base_url=DASHSCOPE_BASE_URL,
-        )
+        self.api_key = DASHSCOPE_API_KEY
+        self.base_url = DASHSCOPE_BASE_URL
         self.model = OCR_MODEL
 
     def recognize_image(self, image_url: str, prompt: str = "请仅输出图像中的文本内容。") -> str:
@@ -22,9 +21,14 @@ class AliyunOCRClient:
         Returns:
             识别出的文本内容
         """
-        completion = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        data = {
+            "model": self.model,
+            "messages": [
                 {
                     "role": "user",
                     "content": [
@@ -36,8 +40,18 @@ class AliyunOCRClient:
                     ],
                 }
             ],
+        }
+
+        response = requests.post(
+            f"{self.base_url}/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=60
         )
-        return completion.choices[0].message.content
+        response.raise_for_status()
+
+        result = response.json()
+        return result["choices"][0]["message"]["content"]
 
     def recognize_local_image(self, image_path: str, prompt: str = "请仅输出图像中的文本内容。") -> str:
         """
@@ -66,9 +80,14 @@ class AliyunOCRClient:
         }
         mime_type = mime_types.get(ext, "image/jpeg")
 
-        completion = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        data = {
+            "model": self.model,
+            "messages": [
                 {
                     "role": "user",
                     "content": [
@@ -80,5 +99,15 @@ class AliyunOCRClient:
                     ],
                 }
             ],
+        }
+
+        response = requests.post(
+            f"{self.base_url}/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=60
         )
-        return completion.choices[0].message.content
+        response.raise_for_status()
+
+        result = response.json()
+        return result["choices"][0]["message"]["content"]

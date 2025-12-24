@@ -1,0 +1,37 @@
+# Backend
+backend/__pycache__/
+backend/uploads/
+backend/.env
+backend/.env.local
+backend/venv/
+backend/env/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/npm-debug.log
+frontend/yarn-error.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+.pytest_cache/
+.coverage
+
+# Vite
+.viteignore

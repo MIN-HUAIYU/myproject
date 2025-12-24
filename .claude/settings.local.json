@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(ssh -i %USERPROFILE%.sshid_ed25519 root@139.224.207.84 \"echo ''SSH连接成功！'' && uname -a\")",
+      "Bash(ssh -i %USERPROFILE%.sshid_ed25519 root@139.224.207.84 \"\ncd /root/drawing_information && \\\\\necho ''Step 1: Update system packages...'' && \\\\\napt update > /dev/null 2>&1 && \\\\\necho ''Step 2: Install Python environment...'' && \\\\\napt install -y python3 python3-pip python3-venv > /dev/null 2>&1 && \\\\\necho ''Step 3: Install Node.js...'' && \\\\\napt install -y nodejs npm > /dev/null 2>&1 && \\\\\necho ''Step 4: Install Nginx...'' && \\\\\napt install -y nginx > /dev/null 2>&1 && \\\\\nsystemctl enable nginx > /dev/null 2>&1 && \\\\\necho ''Step 5: Setup Python venv...'' && \\\\\npython3 -m venv venv && \\\\\nsource venv/bin/activate && \\\\\npip install --upgrade pip > /dev/null 2>&1 && \\\\\npip install -r backend/requirements.txt > /dev/null 2>&1 && \\\\\ndeactivate && \\\\\necho ''Step 6: Build frontend...'' && \\\\\ncd frontend && \\\\\nnpm install --legacy-peer-deps > /dev/null 2>&1 && \\\\\nnpm run build > /dev/null 2>&1 && \\\\\ncd .. && \\\\\necho ''Step 7: Create upload directory...'' && \\\\\nmkdir -p backend/uploads && \\\\\nchmod 755 backend/uploads && \\\\\necho ''Step 8: Setup environment variables...'' && \\\\\necho ''DASHSCOPE_API_KEY=sk-f5df10037dd249809982c4e43f9e2b69'' > .env && \\\\\necho '''' && \\\\\necho ''All setup steps completed successfully!''\n\")",
+      "Bash(ssh -i %USERPROFILE%.sshid_ed25519 root@139.224.207.84 \"ls -la /root/drawing_information/ | head -20\")",
+      "Bash(ssh -i %USERPROFILE%.sshid_ed25519 root@139.224.207.84 \"ls -lh /root/drawing_information | wc -l\")",
+      "Bash(ssh -i ~/.ssh/id_ed25519 root@139.224.207.84:*)"
+    ]
+  }
+}
