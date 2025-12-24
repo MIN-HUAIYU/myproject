@@ -64,6 +64,29 @@ jobs:
           scp -i ~/.ssh/id_ed25519 -r drawing_information/models \
             root@139.224.207.84:/root/drawing_information/
 
+          # 更新 systemd 服务配置
+          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 << 'ENDSSH'
+            cat > /etc/systemd/system/drawing-ocr.service << 'SERVICE'
+[Unit]
+Description=Drawing OCR Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/drawing_information
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/usr/bin/python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+            systemctl daemon-reload
+          ENDSSH
+
           # 安装依赖和重启服务
           ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 << 'ENDSSH'
             cd /root/drawing_information/backend
