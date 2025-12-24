@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 import json
 from datetime import datetime
+from urllib.parse import quote
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).parent.parent
@@ -116,13 +117,16 @@ async def export_excel(ocr_text: str = Form(...)):
         # 生成 Excel
         excel_file = export_to_excel(ocr_text)
 
-        # 生成文件名
+        # 生成文件名（使用 RFC 5987 标准编码中文文件名）
         filename = f"设备信息_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        filename_utf8 = quote(filename, safe='')
 
         return StreamingResponse(
             iter([excel_file.getvalue()]),
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
+            headers={
+                "Content-Disposition": f"attachment; filename*=UTF-8''{filename_utf8}"
+            }
         )
 
     except Exception as e:
