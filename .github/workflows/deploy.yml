@@ -65,8 +65,8 @@ jobs:
             root@139.224.207.84:/root/drawing_information/
 
           # 更新 systemd 服务配置
-          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 << 'ENDSSH'
-            cat > /etc/systemd/system/drawing-ocr.service << 'SERVICE'
+          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 'bash -s' << 'ENDSSH'
+cat > /etc/systemd/system/drawing-ocr.service << 'EOF'
 [Unit]
 Description=Drawing OCR Service
 After=network.target
@@ -82,10 +82,9 @@ RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
-SERVICE
-
-            systemctl daemon-reload
-          ENDSSH
+EOF
+systemctl daemon-reload
+ENDSSH
 
           # 安装依赖和重启服务
           ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 << 'ENDSSH'
