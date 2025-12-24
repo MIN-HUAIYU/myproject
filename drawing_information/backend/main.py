@@ -117,15 +117,15 @@ async def export_excel(ocr_text: str = Form(...)):
         # 生成 Excel
         excel_file = export_to_excel(ocr_text)
 
-        # 生成文件名（使用 RFC 5987 标准编码中文文件名）
-        filename = f"设备信息_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        filename_utf8 = quote(filename, safe='')
+        # 生成文件名（使用英文避免编码问题）
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"equipment_info_{timestamp}.xlsx"
 
         return StreamingResponse(
             iter([excel_file.getvalue()]),
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers={
-                "Content-Disposition": f"attachment; filename*=UTF-8''{filename_utf8}"
+                "Content-Disposition": f"attachment; filename={filename}"
             }
         )
 
