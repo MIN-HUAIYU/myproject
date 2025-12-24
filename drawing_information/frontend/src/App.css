@@ -159,8 +159,15 @@ input[type='file']:disabled + .file-label {
   white-space: pre-wrap;
 }
 
-.copy-btn {
-  width: 100%;
+.result-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.copy-btn,
+.export-btn {
+  flex: 1;
   padding: 10px;
   background: #667eea;
   color: white;
@@ -168,11 +175,19 @@ input[type='file']:disabled + .file-label {
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.copy-btn:hover {
+.copy-btn:hover,
+.export-btn:hover {
   background: #764ba2;
+  transform: translateY(-1px);
+}
+
+.export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 @media (max-width: 600px) {

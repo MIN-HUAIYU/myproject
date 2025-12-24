@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 import os
 import sys
 from pathlib import Path
@@ -11,6 +12,10 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from models.ocr_client import AliyunOCRClient
+try:
+    from .excel_exporter import export_to_excel
+except ImportError:
+    from excel_exporter import export_to_excel
 
 app = FastAPI(title="Drawing OCR Service")
 
@@ -87,6 +92,44 @@ async def process_image(file: UploadFile = File(...)):
         raise HTTPException(
             status_code=500,
             detail=f"OCR处理失败：{str(e)}"
+        )
+
+
+@app.post("/api/export-excel")
+async def export_excel(ocr_text: str):
+    """
+    将 OCR 提取的文本导出为 Excel 表格
+
+    Args:
+        ocr_text: OCR 识别的文本内容
+
+    Returns:
+        Excel 文件流
+    """
+    try:
+        if not ocr_text or ocr_text.strip() == "":
+            raise HTTPException(
+                status_code=400,
+                detail="OCR 文本不能为空"
+            )
+
+        # 生成 Excel
+        excel_file = export_to_excel(ocr_text)
+
+        # 生成文件名
+        filename = f"设备信息_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+
+        return StreamingResponse(
+            iter([excel_file.getvalue()]),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+
+    except Exception as e:
+        print(f"导出 Excel 失败：{str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"导出 Excel 失败：{str(e)}"
         )
 
 

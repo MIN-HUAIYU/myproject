@@ -1,0 +1,81 @@
+name: CI/CD Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout 代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. 配置 SSH 密钥
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 139.224.207.84 >> ~/.ssh/known_hosts
+
+      # 3. 构建前端
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        run: |
+          cd drawing_information/frontend
+          npm install
+          npm run build
+
+      # 4. 并行部署前端和后端
+      - name: Deploy Frontend
+        run: |
+          # 清理目录
+          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 \
+            "mkdir -p /www/wwwroot/aiaiai && rm -rf /www/wwwroot/aiaiai/*"
+
+          # 上传前端文件
+          scp -i ~/.ssh/id_ed25519 -r drawing_information/frontend/dist/* \
+            root@139.224.207.84:/www/wwwroot/aiaiai/
+
+          # 设置权限
+          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 \
+            "chmod -R 755 /www/wwwroot/aiaiai && chown -R www:www /www/wwwroot/aiaiai"
+
+      - name: Deploy Backend
+        run: |
+          # 上传后端代码
+          scp -i ~/.ssh/id_ed25519 -r drawing_information/backend/* \
+            root@139.224.207.84:/root/drawing_information/backend/
+
+          # 安装依赖和重启服务
+          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 << 'ENDSSH'
+            cd /root/drawing_information/backend
+            pip3 install -r requirements.txt
+            systemctl restart drawing-ocr
+            sleep 2
+            systemctl status drawing-ocr --no-pager
+          ENDSSH
+
+      # 5. 部署验证
+      - name: Verify Deployment
+        run: |
+          ssh -i ~/.ssh/id_ed25519 root@139.224.207.84 << 'ENDSSH'
+            echo "=== Frontend Files ==="
+            ls -la /www/wwwroot/aiaiai | head -10
+
+            echo ""
+            echo "=== Backend Service Status ==="
+            systemctl status drawing-ocr --no-pager
+
+            echo ""
+            echo "=== Deployment Completed ==="
+            date
+          ENDSSH

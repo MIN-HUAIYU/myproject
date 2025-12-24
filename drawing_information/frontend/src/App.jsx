@@ -6,6 +6,7 @@ function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   // 获取API基础URL，支持环境变量和默认值
   const getApiUrl = () => {
@@ -62,6 +63,46 @@ function App() {
     }
   };
 
+  const handleExportToExcel = async () => {
+    if (!result || !result.ocr_result) {
+      setError('没有识别结果，无法导出');
+      return;
+    }
+
+    setExporting(true);
+    setError(null);
+
+    try {
+      const response = await fetch('http://139.224.207.84:8000/api/export-excel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `ocr_text=${encodeURIComponent(result.ocr_result)}`,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || '导出失败');
+      }
+
+      // 获取 Blob 并下载
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `设备信息_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError(err.message || '导出 Excel 时出错');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="App">
       <div className="container">
@@ -106,15 +147,24 @@ function App() {
             <div className="result-content">
               <p>{result.ocr_result}</p>
             </div>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(result.ocr_result);
-                alert('已复制到剪贴板');
-              }}
-              className="copy-btn"
-            >
-              📋 复制结果
-            </button>
+            <div className="result-buttons">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(result.ocr_result);
+                  alert('已复制到剪贴板');
+                }}
+                className="copy-btn"
+              >
+                📋 复制结果
+              </button>
+              <button
+                onClick={handleExportToExcel}
+                disabled={exporting}
+                className="export-btn"
+              >
+                {exporting ? '导出中...' : '📊 导出到 Excel'}
+              </button>
+            </div>
           </div>
         )}
       </div>
