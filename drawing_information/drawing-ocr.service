@@ -1,0 +1,15 @@
+[Unit]
+Description=Drawing OCR Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/drawing_information
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/usr/bin/python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
