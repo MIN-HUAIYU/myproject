@@ -10,7 +10,7 @@ from io import BytesIO
 
 
 def extract_equipment_info(ocr_text):
-    """从 OCR 文本中提取设备信息"""
+    """从 OCR 文本中提取设备信息 - 改进版本支持两条流程"""
     data = {
         "产品编号": "",
         "用户信息": "",
@@ -26,96 +26,85 @@ def extract_equipment_info(ocr_text):
         "换热面积/㎡": ""
     }
 
-    # 提取产品编号 (JOB NO.)
-    job_match = re.search(r'(?:JOB NO\.|产品编号)\s*\n\s*([A-Z0-9\-]+)', ocr_text)
-    if job_match:
-        data["产品编号"] = job_match.group(1).strip()
+    # 预处理：按行分割文本
+    text_lines = ocr_text.split('\n')
 
-    # 提取设备名称 (DRAWING TITLE:)
-    title_match = re.search(r'(?:DRAWING TITLE:|图纸名称)\s*[：:]*\s*\n\s*([^\n]+)', ocr_text)
-    if title_match:
-        data["设备名称"] = title_match.group(1).strip()
+    # 1. 设计压力（流程一、流程二）
+    for i, line in enumerate(text_lines):
+        if '压力' in line and '设计' in line:
+            # 尝试多种正则方式
+            match = re.search(r'设计\s+([\d./]+)\s+([\d./]+)', line)
+            if not match:
+                match = re.search(r'([\d.]+/[A-Z]+)\s+([\d.]+/[A-Z]+)', line)
+            if match:
+                pressure_1 = match.group(1).strip()
+                pressure_2 = match.group(2).strip()
+                data["设计压力/MPa"] = f"{pressure_1} / {pressure_2}"
+                break
 
-    # 提取用户信息 (CLIENT 或 业主)
-    client_match = re.search(r'(?:业主|CLIENT)\s*(?:LCLIENT)?\s*(?:PROJECT NO\.)?\s*([^\n]+)', ocr_text)
-    if client_match:
-        data["用户信息"] = client_match.group(1).strip()
+    # 2. 设计温度（流程一、流程二）
+    for i, line in enumerate(text_lines):
+        if '温度' in line and '设计' in line:
+            match = re.search(r'设计\s+(\d+)\s+(\d+)', line)
+            if match:
+                temp_1 = match.group(1).strip()
+                temp_2 = match.group(2).strip()
+                data["设计温度/℃"] = f"{temp_1} / {temp_2}"
+                break
 
-    # 提取设备型号 (LTB开头 或其他型号)
-    model_match = re.search(r'(LTB[^\s\n]+|PHE[^\s\n]+|[A-Z]+\d+[^\s\n]*)', ocr_text)
-    if model_match:
-        data["设备型号"] = model_match.group(1).strip()
+    # 3. 介质名称（流程一、流程二）
+    medium_match = re.search(
+        r'介质[^\n]*?名称\s+(\S+)\s+(.+?)(?:毒性|爆炸|$)',
+        ocr_text,
+        re.DOTALL
+    )
+    if medium_match:
+        medium_1 = medium_match.group(1).strip()
+        medium_2 = medium_match.group(2).strip()
+        # 移除括号内的注释
+        medium_2 = re.sub(r'\([^)]*\)', '', medium_2).strip()
+        data["热侧/冷侧介质名称"] = f"{medium_1} / {medium_2}"
 
-    # 提取板片材质
+    # 4. 板片材质
     material_patterns = [r'316L', r'316', r'钛', r'铜镍', r'不锈钢']
     for pattern in material_patterns:
         if re.search(pattern, ocr_text):
             data["板片材质"] = pattern
             break
 
-    # 提取台数
-    qty_match = re.search(r'台数\s*[:：]?\s*(\d+)', ocr_text)
-    if qty_match:
-        data["台数"] = qty_match.group(1)
-    else:
-        # 尝试其他模式
-        qty_match = re.search(r'(?:QTY|Qty)\s*[:：]?\s*(\d+)', ocr_text, re.IGNORECASE)
-        if qty_match:
-            data["台数"] = qty_match.group(1)
-
-    # 提取单台重量 (kg)
-    weight_match = re.search(r'(?:重量|Weight|单台重量)\s*[:：]?\s*(\d+\.?\d*)\s*(?:kg|Kg)', ocr_text)
-    if weight_match:
-        data["单台重量"] = weight_match.group(1) + " kg"
-
-    # 提取设计温度 (℃)
-    temp_patterns = [
-        r'设计\s*(?:温度)?\s*(\d+)\s*℃',
-        r'温度\s*[:：]?\s*(\d+)\s*℃',
-        r'(?:Design\s+)?[Tt]emperature\s*[:：]?\s*(\d+)\s*°C',
-    ]
-    for pattern in temp_patterns:
-        temp_match = re.search(pattern, ocr_text)
-        if temp_match:
-            data["设计温度/℃"] = temp_match.group(1)
-            break
-
-    # 提取设计压力 (MPa)
-    pressure_patterns = [
-        r'设计\s*(?:压力)?\s*([\d.]+)\s*(?:MPa|Mpa)',
-        r'压力\s*[:：]?\s*([\d.]+)\s*(?:MPa|Mpa)',
-        r'(?:Design\s+)?[Pp]ressure\s*[:：]?\s*([\d.]+)\s*(?:MPa|bar)',
-    ]
-    for pattern in pressure_patterns:
-        pressure_match = re.search(pattern, ocr_text)
-        if pressure_match:
-            data["设计压力/MPa"] = pressure_match.group(1)
-            break
-
-    # 提取介质信息
-    medium_patterns = [
-        r'介质\s*名称\s*([^\n]+)',
-        r'(?:热侧|冷侧)\s*[:：]?\s*([^\n]+)',
-        r'[Mm]edium\s*[:：]?\s*([^\n]+)',
-    ]
-    for pattern in medium_patterns:
-        medium_match = re.search(pattern, ocr_text)
-        if medium_match:
-            medium_text = medium_match.group(1).strip()
-            # 尝试分离热侧和冷侧
-            if '/' in medium_text:
-                parts = medium_text.split('/')
-                data["热侧/冷侧介质名称"] = parts[0].strip()
-                if len(parts) > 1:
-                    data["板程/壳程介质名称"] = parts[1].strip()
-            else:
-                data["热侧/冷侧介质名称"] = medium_text
-            break
-
-    # 提取换热面积
-    area_match = re.search(r'(?:换热面积|面积|Heat[_\s]?Area)\s*[:：]?\s*([\d.]+)\s*(?:㎡|m²|m2)', ocr_text)
+    # 5. 换热面积
+    area_match = re.search(r'换热面积\s*m²\s*([\d.]+)', ocr_text)
     if area_match:
-        data["换热面积/㎡"] = area_match.group(1)
+        data["换热面积/㎡"] = area_match.group(1).strip()
+
+    # 6. 设备净重（单台重量）
+    weight_match = re.search(r'设备净重\s*kg\s*(\d+)', ocr_text)
+    if weight_match:
+        data["单台重量"] = weight_match.group(1).strip() + " kg"
+
+    # 7. 台数
+    # 默认为1台（单台设备）
+    data["台数"] = "1"
+
+    # 8. 产品编号 (JOB NO.)
+    job_match = re.search(r'(?:JOB NO\.|产品编号)\s*\n\s*([A-Z0-9\-]+)', ocr_text)
+    if job_match:
+        data["产品编号"] = job_match.group(1).strip()
+
+    # 9. 设备名称 (DRAWING TITLE: 或在描述中)
+    title_match = re.search(r'(?:DRAWING TITLE:|图纸名称)\s*[：:]*\s*\n\s*([^\n]+)', ocr_text)
+    if title_match:
+        data["设备名称"] = title_match.group(1).strip()
+
+    # 10. 用户信息 (CLIENT 或 业主)
+    client_match = re.search(r'(?:业主|CLIENT)\s*(?:LCLIENT)?\s*(?:PROJECT NO\.)?\s*([^\n]+)', ocr_text)
+    if client_match:
+        data["用户信息"] = client_match.group(1).strip()
+
+    # 11. 设备型号 (LTB开头 或其他型号)
+    model_match = re.search(r'(LTB[^\s\n]+|PHE[^\s\n]+|[A-Z]+\d+[^\s\n]*)', ocr_text)
+    if model_match:
+        data["设备型号"] = model_match.group(1).strip()
 
     return data
 
