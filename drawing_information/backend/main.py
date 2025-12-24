@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import os
@@ -96,12 +96,12 @@ async def process_image(file: UploadFile = File(...)):
 
 
 @app.post("/api/export-excel")
-async def export_excel(ocr_text: str):
+async def export_excel(ocr_text: str = Form(...)):
     """
     将 OCR 提取的文本导出为 Excel 表格
 
     Args:
-        ocr_text: OCR 识别的文本内容
+        ocr_text: OCR 识别的文本内容（表单参数）
 
     Returns:
         Excel 文件流
